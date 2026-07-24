@@ -1,0 +1,6 @@
+order_id,order_date,country,category,quantity,price,status,email
+1001,2026-07-01,fr,Electronics,2,199.99,PAID,alice@example.com
+1002,2026-07-01,DE,Home,1,89.50,SHIPPED,bob@example.com
+1003,2026-07-02, es ,Gaming,3,59.90,pending,charlie@example.com
+1004,2026-07-02,FR,Electronics,,249.00,PAID,diane@example.com
+1005,2026-07-03,IT,Books,4,,CANCELLED,eric@example.com
