@@ -1,0 +1,10 @@
+{
+  "order_id": 42,
+  "event_time": "2026-07-10T12:00:00Z",
+  "country": " fr ",
+  "category": "Electronics",
+  "quantity": 2,
+  "price": 199.99,
+  "status": "PAID",
+  "email": "customer.secret@example.com"
+}
