@@ -1,11 +1,21 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
+
+# Virtual environments
 .venv/
 venv/
+env/
 
 # Environment variables
 .env
+.env.local
+
+# Google Cloud credentials
+service-account*.json
+credentials*.json
+application_default_credentials.json
 
 # IDE
 .vscode/
@@ -15,6 +25,10 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Credentials
-service-account*.json
-credentials*.json
+# Tests and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
