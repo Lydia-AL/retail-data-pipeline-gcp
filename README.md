@@ -19,7 +19,7 @@ Le dépôt contient quatre pipelines complémentaires :
 
 > **Insérer ici le schéma d'architecture global du projet**
 
-<!-- Ajouter ici l'image de l'architecture -->
+<img src="docs/images/architecture.png" width="850">
 
 ## Vue d'ensemble de l'architecture
 
