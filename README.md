@@ -1,19 +1,27 @@
 # Retail Data Pipelines on Google Cloud
 
-This repository presents several Data Engineering pipelines built on Google Cloud around a retail use case.
+# Pipelines de données Retail sur Google Cloud
 
-The project explores streaming ingestion, event-driven processing, data transformation, PII masking and workflow orchestration using Pub/Sub, BigQuery, Cloud Storage, Cloud Run functions and Cloud Composer.
+Ce dépôt présente plusieurs pipelines de Data Engineering construits sur Google Cloud autour d'un cas d'usage dans le domaine du retail.
 
-## Project overview
+Le projet explore l'ingestion en streaming, le traitement événementiel, la transformation des données, le masquage des données personnelles (PII) et l'orchestration de workflows à l'aide de Pub/Sub, BigQuery, Cloud Storage, Cloud Run Functions et Cloud Composer.
 
-The repository contains four complementary pipelines:
+## Présentation du projet
 
-1. native streaming ingestion from Pub/Sub to BigQuery;
-2. event-driven CSV ingestion from Cloud Storage to BigQuery;
-3. Pub/Sub processing with normalization and email masking;
-4. daily ELT orchestration with Cloud Composer and Apache Airflow.
+Le dépôt contient quatre pipelines complémentaires :
 
-## Architecture overview
+1. ingestion native en streaming de Pub/Sub vers BigQuery ;
+2. ingestion événementielle de fichiers CSV depuis Cloud Storage vers BigQuery ;
+3. traitement Pub/Sub avec normalisation et masquage des adresses e-mail ;
+4. orchestration quotidienne d'un processus ELT avec Cloud Composer et Apache Airflow.
+
+## Architecture
+
+> **Insérer ici le schéma d'architecture global du projet**
+
+<!-- Ajouter ici l'image de l'architecture -->
+
+## Vue d'ensemble de l'architecture
 
 ```text
 Pipeline 1
@@ -22,18 +30,18 @@ Publisher
     ↓
 Pub/Sub
     ↓
-BigQuery subscription
+Abonnement BigQuery
     ↓
 BigQuery orders_streaming
 
 
 Pipeline 2
 
-CSV file
+Fichier CSV
     ↓
 Cloud Storage
     ↓
-Cloud Run function
+Cloud Run Function
     ↓
 Pandas
     ↓
@@ -42,20 +50,20 @@ BigQuery orders_raw
 
 Pipeline 3
 
-Pub/Sub transaction
+Transaction Pub/Sub
     ↓
-Cloud Run function
+Cloud Run Function
     ↓
-Validation and normalization
+Validation et normalisation
     ↓
-Email masking
+Masquage des e-mails
     ↓
 BigQuery orders_streaming_safe
 
 
 Pipeline 4
 
-Cloud Storage CSV
+CSV dans Cloud Storage
     ↓
 Cloud Composer / Airflow
     ↓
@@ -66,14 +74,14 @@ BigQuery orders_cleaned
 BigQuery daily_revenue
 ```
 
-A visual architecture diagram will be added to this section.
+Un schéma d'architecture visuel sera ajouté dans cette section.
 
 ## Technologies
 
 - Google Cloud Pub/Sub
 - BigQuery
 - Cloud Storage
-- Cloud Run functions
+- Cloud Run Functions
 - Eventarc
 - Cloud Composer
 - Apache Airflow
@@ -82,7 +90,7 @@ A visual architecture diagram will be added to this section.
 - Pandas
 - IAM
 
-## Repository structure
+## Structure du dépôt
 
 ```text
 retail-data-pipeline-gcp/
@@ -134,110 +142,110 @@ retail-data-pipeline-gcp/
     └── troubleshooting.md
 ```
 
-## Pipeline 1 — Native Pub/Sub to BigQuery streaming
+## Pipeline 1 — Streaming natif de Pub/Sub vers BigQuery
 
 ```text
 Publisher
     ↓
-Pub/Sub topic
+Topic Pub/Sub
     ↓
-BigQuery subscription
+Abonnement BigQuery
     ↓
-Partitioned BigQuery table
+Table BigQuery partitionnée
 ```
 
-This pipeline streams retail order events directly from Pub/Sub to BigQuery.
+Ce pipeline diffuse directement les événements de commandes retail de Pub/Sub vers BigQuery.
 
-It demonstrates that a custom consumer is not always required when messages can be inserted without transformation.
+Il montre qu'un consommateur personnalisé n'est pas toujours nécessaire lorsque les messages peuvent être insérés sans transformation.
 
-The destination table is partitioned using the event timestamp.
+La table de destination est partitionnée à partir du timestamp de l'événement.
 
-More details:
+Plus de détails :
 
 ```text
 01-pubsub-to-bigquery/README.md
 ```
 
-## Pipeline 2 — Cloud Storage to BigQuery
+## Pipeline 2 — De Cloud Storage vers BigQuery
 
 ```text
-CSV file
+Fichier CSV
     ↓
 Cloud Storage
     ↓
-Cloud Run function
+Cloud Run Function
     ↓
-Pandas DataFrame
+DataFrame Pandas
     ↓
 BigQuery orders_raw
 ```
 
-Uploading a CSV file to Cloud Storage triggers a Cloud Run function.
+Le dépôt d'un fichier CSV dans Cloud Storage déclenche une Cloud Run Function.
 
-The function:
+La fonction :
 
-- reads the Cloud Storage event;
-- downloads the file into memory;
-- parses the content with Pandas;
-- converts missing values;
-- inserts the rows into BigQuery.
+- lit l'événement Cloud Storage ;
+- télécharge le fichier en mémoire ;
+- analyse son contenu avec Pandas ;
+- convertit les valeurs manquantes ;
+- insère les lignes dans BigQuery.
 
-This architecture represents a common event-driven ingestion pattern for files delivered by external providers.
+Cette architecture représente un modèle classique d'ingestion événementielle de fichiers provenant de fournisseurs externes.
 
-More details:
+Plus de détails :
 
 ```text
 02-event-driven-functions/gcs-to-bigquery/README.md
 ```
 
-## Pipeline 3 — Pub/Sub to BigQuery with PII masking
+## Pipeline 3 — Pub/Sub vers BigQuery avec masquage des données personnelles
 
 ```text
-Pub/Sub message
+Message Pub/Sub
         ↓
-Cloud Run function
+Cloud Run Function
         ↓
 Validation
         ↓
-Normalization
+Normalisation
         ↓
-Email masking
+Masquage des e-mails
         ↓
 BigQuery
 ```
 
-This pipeline introduces a transformation layer between Pub/Sub and BigQuery.
+Ce pipeline introduit une couche de transformation entre Pub/Sub et BigQuery.
 
-The Cloud Run function:
+La Cloud Run Function :
 
-- decodes the Base64 payload;
-- parses the JSON message;
-- validates required fields;
-- normalizes country, category and status;
-- converts numeric fields;
-- masks the customer email address;
-- adds an ingestion timestamp;
-- inserts the transformed event into BigQuery.
+- décode le payload Base64 ;
+- analyse le message JSON ;
+- valide les champs obligatoires ;
+- normalise le pays, la catégorie et le statut ;
+- convertit les champs numériques ;
+- masque l'adresse e-mail du client ;
+- ajoute un horodatage d'ingestion ;
+- insère l'événement transformé dans BigQuery.
 
-Example:
+Exemple :
 
 ```text
 customer.secret@example.com
 ```
 
-becomes:
+devient :
 
 ```text
 cu***@example.com
 ```
 
-More details:
+Plus de détails :
 
 ```text
 02-event-driven-functions/pubsub-to-bigquery-safe/README.md
 ```
 
-## Pipeline 4 — Cloud Composer orchestration
+## Pipeline 4 — Orchestration avec Cloud Composer
 
 ```text
 orders_raw.csv
@@ -255,23 +263,23 @@ aggregate_daily
 daily_revenue
 ```
 
-The Cloud Composer pipeline uses Apache Airflow to orchestrate three dependent tasks:
+Le pipeline Cloud Composer utilise Apache Airflow pour orchestrer trois tâches dépendantes :
 
-1. load the raw CSV from Cloud Storage;
-2. clean and standardize the data in BigQuery;
-3. calculate daily revenue.
+1. charger le fichier CSV brut depuis Cloud Storage ;
+2. nettoyer et standardiser les données dans BigQuery ;
+3. calculer le chiffre d'affaires quotidien.
 
-The cleaned table is partitioned by date and clustered by business dimensions.
+La table nettoyée est partitionnée par date et clusterisée selon des dimensions métier.
 
-The daily revenue table contains:
+La table `daily_revenue` contient :
 
-- order count;
-- units sold;
-- revenue;
-- country;
-- product category.
+- le nombre de commandes ;
+- les quantités vendues ;
+- le chiffre d'affaires ;
+- le pays ;
+- la catégorie de produit.
 
-More details:
+Plus de détails :
 
 ```text
 03-cloud-composer/README.md
@@ -279,15 +287,15 @@ More details:
 
 ## Configuration
 
-The examples use placeholders instead of real Google Cloud identifiers.
+Les exemples utilisent des identifiants Google Cloud fictifs.
 
-Copy the environment template:
+Copiez le modèle d'environnement :
 
 ```bash
 cp .env.example .env
 ```
 
-Then configure:
+Puis configurez :
 
 ```text
 PROJECT_ID
@@ -297,7 +305,7 @@ BQ_DATASET
 BQ_TABLE
 ```
 
-Cloud Composer also requires the following Airflow variables:
+Cloud Composer nécessite également les variables Airflow suivantes :
 
 ```text
 project_id
@@ -305,131 +313,133 @@ raw_bucket
 bq_location
 ```
 
-## Sample data
+## Données d'exemple
 
-All sample data in this repository is synthetic.
+Toutes les données d'exemple de ce dépôt sont synthétiques.
 
-The raw CSV intentionally contains several quality issues:
+Le fichier CSV brut contient volontairement plusieurs problèmes de qualité :
 
-- inconsistent uppercase and lowercase values;
-- leading and trailing spaces;
-- missing quantities;
-- missing prices.
+- valeurs incohérentes en majuscules et minuscules ;
+- espaces en début et fin de chaîne ;
+- quantités manquantes ;
+- prix manquants.
 
-These imperfections illustrate the difference between:
+Ces imperfections illustrent la différence entre :
 
-- a raw ingestion layer;
-- a cleaned transformation layer;
-- an aggregated business layer.
+- une couche d'ingestion brute ;
+- une couche de transformation nettoyée ;
+- une couche métier agrégée.
 
-## Data model
+## Modèle de données
 
-### Raw table
+### Table brute
 
 ```text
 retail.orders_raw
 ```
 
-Contains the source data without business transformations.
+Contient les données sources sans transformation métier.
 
-### Cleaned table
+### Table nettoyée
 
 ```text
 retail.orders_cleaned
 ```
 
-Contains normalized and validated order data.
+Contient les données de commandes normalisées et validées.
 
-### Aggregated table
+### Table agrégée
 
 ```text
 retail.daily_revenue
 ```
 
-Contains daily business metrics by country and category.
+Contient les indicateurs métier quotidiens par pays et par catégorie.
 
-### Safe streaming table
+### Table de streaming sécurisée
 
 ```text
 ecom_dataset.orders_streaming_safe
 ```
 
-Contains normalized streaming events with masked email addresses.
+Contient les événements de streaming normalisés avec les adresses e-mail masquées.
 
-## Security and IAM
+## Sécurité et IAM
 
-The project uses several Google Cloud identities:
+Le projet utilise plusieurs identités Google Cloud :
 
-- Pub/Sub service agent;
-- Cloud Run function runtime service accounts;
-- Cloud Composer service account.
+- l'agent de service Pub/Sub ;
+- les comptes de service d'exécution des Cloud Run Functions ;
+- le compte de service Cloud Composer.
 
-Each identity should receive only the permissions required for its pipeline.
+Chaque identité ne doit recevoir que les permissions nécessaires à son pipeline.
 
-No credentials or service-account keys are stored in this repository.
+Aucun identifiant ni clé de compte de service n'est stocké dans ce dépôt.
 
-More details:
+Plus de détails :
 
 ```text
 docs/iam.md
 ```
 
-## Production considerations
+## Considérations pour la production
 
-These implementations focus on demonstrating the core GCP architectures.
+Ces implémentations ont pour objectif de démontrer les principales architectures GCP.
 
-A production-ready solution could add:
+Une solution prête pour la production pourrait ajouter :
 
-- explicit schema contracts;
-- dead-letter topics;
-- rejected-file quarantine;
-- idempotency;
-- duplicate detection;
-- incremental loading;
-- data-quality tests;
-- structured logging;
-- monitoring and alerting;
-- automated unit and integration tests;
-- continuous integration;
-- separate development and production environments;
-- secret management;
-- policy tags and column-level security.
+- des contrats de schéma explicites ;
+- des topics de dead-letter ;
+- une quarantaine pour les fichiers rejetés ;
+- l'idempotence ;
+- la détection des doublons ;
+- des chargements incrémentaux ;
+- des tests de qualité des données ;
+- des logs structurés ;
+- du monitoring et des alertes ;
+- des tests unitaires et d'intégration automatisés ;
+- une intégration continue ;
+- des environnements séparés de développement et de production ;
+- la gestion des secrets ;
+- des policy tags et une sécurité au niveau des colonnes.
 
-## Cost control
+## Maîtrise des coûts
 
-Managed cloud services can generate costs while resources remain active.
+Les services cloud managés peuvent continuer à générer des coûts tant que les ressources restent actives.
 
-After testing, unused resources should be deleted or disabled, particularly:
+Après les tests, les ressources inutilisées doivent être supprimées ou désactivées, notamment :
 
-- Cloud Composer environments;
-- Cloud Run functions;
-- Eventarc triggers;
-- Pub/Sub topics and subscriptions;
-- Cloud Storage buckets;
-- BigQuery datasets and tables.
+- les environnements Cloud Composer ;
+- les Cloud Run Functions ;
+- les déclencheurs Eventarc ;
+- les topics et abonnements Pub/Sub ;
+- les buckets Cloud Storage ;
+- les jeux de données et tables BigQuery.
 
-## What I learned
+## Ce que j'ai appris
 
-Through this project, I practiced:
+À travers ce projet, j'ai pratiqué :
 
-- designing batch and streaming ingestion pipelines;
-- connecting Pub/Sub directly to BigQuery;
-- building event-driven Cloud Run functions;
-- reading Cloud Storage events;
-- decoding Pub/Sub messages;
-- processing CSV files with Pandas;
-- validating and normalizing event data;
-- masking personally identifiable information;
-- defining BigQuery schemas;
-- using partitioning and clustering;
-- creating Apache Airflow DAGs;
-- managing task dependencies;
-- orchestrating ELT workflows with Cloud Composer;
-- configuring IAM roles and service accounts;
-- troubleshooting distributed cloud pipelines.
+- la conception de pipelines d'ingestion batch et streaming ;
+- la connexion directe entre Pub/Sub et BigQuery ;
+- le développement de Cloud Run Functions événementielles ;
+- la lecture des événements Cloud Storage ;
+- le décodage des messages Pub/Sub ;
+- le traitement de fichiers CSV avec Pandas ;
+- la validation et la normalisation des données d'événements ;
+- le masquage des données personnelles (PII) ;
+- la définition de schémas BigQuery ;
+- l'utilisation du partitionnement et du clustering ;
+- la création de DAGs Apache Airflow ;
+- la gestion des dépendances entre tâches ;
+- l'orchestration de workflows ELT avec Cloud Composer ;
+- la configuration des rôles IAM et des comptes de service ;
+- le diagnostic de pipelines cloud distribués.
 
-## Project context
+## Contexte du projet
 
-This project was developed as part of a Google Cloud Data Engineering learning journey.
+Ce projet a été développé dans le cadre d'un parcours d'apprentissage en Data Engineering sur Google Cloud.
+
+Les exercices de formation d'origine ont été réorganisés et documentés sous la forme d'un projet de portfolio complet afin de présenter plusieurs modèles complémentaires de Data Engineering.
 
 The original training exercises were reorganized and documented as a single end-to-end portfolio project to demonstrate several complementary Data Engineering patterns.
